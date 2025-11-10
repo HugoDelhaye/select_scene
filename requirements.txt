@@ -1,0 +1,7 @@
+ipywidgets
+pyarrow
+pandas
+fastparquet
+pillow
+plotly
+nbformat>=4.2.0
