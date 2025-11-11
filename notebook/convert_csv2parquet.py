@@ -6,4 +6,5 @@ df = pd.read_csv(
     low_memory=False    # <- avoids partial type guessing
 )
 
+
 df.to_parquet("sourcedata/clips_metadata_with_patterns.parquet")
