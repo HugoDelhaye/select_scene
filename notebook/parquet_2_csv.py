@@ -8,3 +8,4 @@ df_base = df_base.to_pandas(types_mapper=None)
 
 df_im.to_csv("sourcedata/clips_metadata_from_im.csv", index=False)
 df_base.to_csv("sourcedata/clips_metadata_with_patterns.csv", index=False)
+
