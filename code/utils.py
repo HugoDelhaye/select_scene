@@ -49,14 +49,28 @@ def get_mads(df):
 def compute_delta_tot(df, phase_to_ckpt, metric):
 
     df_tmp = df.copy()
-    df_tmp["ckpt"] = df_tmp["Learning_Phase"].map(phase_to_ckpt)
-    df_ckpt =df_tmp.groupby(["Subject", "ckpt"])[metric].mean().reset_index(name=metric)
+    try:
+        df_tmp["ckpt"] = df_tmp["learning_phase"].map(phase_to_ckpt)
+        df_ckpt =df_tmp.groupby(["subject", "ckpt"])[metric].mean().reset_index(name=metric)
 
-    idx_max = df_ckpt.groupby("Subject")["ckpt"].idxmax()
-    df_max = df_ckpt.loc[idx_max, ["Subject", metric]].rename(columns={metric: metric+"_max"})    
-    idx_min = df_ckpt.groupby("Subject")["ckpt"].idxmin()
-    df_min = df_ckpt.loc[idx_min, ["Subject", metric]].rename(columns={metric: metric+"_min"})
+        idx_max = df_ckpt.groupby("subject")["ckpt"].idxmax()
+        df_max = df_ckpt.loc[idx_max, ["subject", metric]].rename(columns={metric: metric+"_max"})    
+        idx_min = df_ckpt.groupby("subject")["ckpt"].idxmin()
+        df_min = df_ckpt.loc[idx_min, ["subject", metric]].rename(columns={metric: metric+"_min"})
 
-    results = df_min.merge(df_max, on="Subject")
-    results['delta_tot'] = results[metric+"_max"] - results[metric+"_min"]
+        results = df_min.merge(df_max, on="subject")
+        results['delta_tot'] = results[metric+"_max"] - results[metric+"_min"]
+
+    except KeyError:
+        df_tmp["ckpt"] = df_tmp["Learning_Phase"].map(phase_to_ckpt)
+        df_ckpt =df_tmp.groupby(["Subject", "ckpt"])[metric].mean().reset_index(name=metric)
+
+        idx_max = df_ckpt.groupby("Subject")["ckpt"].idxmax()
+        df_max = df_ckpt.loc[idx_max, ["Subject", metric]].rename(columns={metric: metric+"_max"})    
+        idx_min = df_ckpt.groupby("Subject")["ckpt"].idxmin()
+        df_min = df_ckpt.loc[idx_min, ["Subject", metric]].rename(columns={metric: metric+"_min"})
+
+        results = df_min.merge(df_max, on="Subject")
+        results['delta_tot'] = results[metric+"_max"] - results[metric+"_min"]
+    
     return results
