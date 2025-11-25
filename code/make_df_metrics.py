@@ -50,7 +50,7 @@ df_meta = df_meta[~df_meta['SceneFullName'].isin(scenes_to_drop)]
 df_variables = df_variables[~df_variables['SceneFullName'].isin(scenes_to_drop)]
 
 ## create the final dataframe ##
-cols = ['subject', 'learning_phase', 'scene_full_name', 'count', 'cleared', 'speed',  'MAD_mean', 'delta_clr_tot', 'delta_spd_tot', 'delta_MAD_tot']
+cols = ['subject', 'learning_phase', 'scene_full_name', 'delta_clr_tot', 'delta_spd_tot', 'delta_MAD_tot']
 df_metrics = pd.DataFrame(columns=cols)
 df_metrics['subject'] = df_meta['Subject'].unique()
 df_metrics['scene_full_name'] = [df_meta['SceneFullName'].unique().tolist()] * df_metrics['subject'].nunique()
@@ -61,41 +61,47 @@ for sub, df_sub in df_metrics.groupby('subject'):
     
 df_metrics = df_metrics.explode('learning_phase').explode('scene_full_name').reset_index(drop=True)
 
-for idx, row in df_metrics.iterrows():
+df_meta_agg = (
+    df_meta
+    .groupby(['Subject', 'Learning_Phase', 'SceneFullName'])
+    .agg(
+        count=('Cleared', 'size'),
+        cleared=('Cleared', 'mean'),
+        speed=('Average_speed', 'mean')
+    )
+    .reset_index()
+)
 
-    sub = row['subject']
-    phase = row['learning_phase']
-    scene = row['scene_full_name']
+df_vars_agg = (
+    df_variables
+    .groupby(['Subject', 'Learning_Phase', 'SceneFullName'])
+    .apply(lambda df: pd.Series({'MAD_mean': utils.get_mads(df)['MAD_mean'].mean()}))
+    .reset_index()
+)
 
-    print(f"Calculating metrics for subject {sub}, phase {phase}, scene {scene}...")
-    
-    mask_meta = (df_meta['Subject'] == sub) & (df_meta['Learning_Phase'] == phase) & (df_meta['SceneFullName'] == scene)
-    mask_vars = (df_variables['Subject'] == sub) & (df_variables['Learning_Phase'] == phase) & (df_variables['SceneFullName'] == scene)
-    df_tmp_meta = df_meta[mask_meta]
-    df_tmp_var = df_variables[mask_vars]
-    
-    df_metrics.at[idx, 'count'] = len(df_tmp_meta)
-    df_metrics.at[idx, 'cleared'] = df_tmp_meta['Cleared'].mean()
-    df_metrics.at[idx, 'speed'] = df_tmp_meta['Average_speed'].mean()
-    df_metrics.at[idx, 'MAD_mean'] = utils.get_mads(df_tmp_var)['MAD_mean'].mean()
+df_agg = df_meta_agg.merge(
+    df_vars_agg,
+    on=['Subject', 'Learning_Phase', 'SceneFullName'],
+    how='left'
+)
 
-for sub_scn, df_sub_scn in df_metrics.groupby(['subject', 'scene_full_name']):
-    sub = sub_scn[0]
-    scn = sub_scn[1]
+df_agg = df_agg.rename(columns={
+    'Subject': 'subject',
+    'Learning_Phase': 'learning_phase',
+    'SceneFullName': 'scene_full_name'
+})
 
-    print(f"Processing subject {sub} and scene {scn}...")
-    mask = (df_metrics['subject'] == sub) & (df_metrics['scene_full_name'] == scn)
-    df_tmp = df_metrics[mask]
-    
-    phase_to_ckpt = {phase: idx for idx, phase in enumerate(sorted(df_tmp['learning_phase'].unique()))}
+df_metrics = df_metrics.merge(
+    df_agg,
+    on=['subject', 'learning_phase', 'scene_full_name'],
+    how='left'
+)
 
-    df_delta_clr = utils.compute_delta_tot(df_tmp, phase_to_ckpt, 'cleared')
-    df_delta_spd = utils.compute_delta_tot(df_tmp, phase_to_ckpt, 'speed')
-    df_delta_mad = utils.compute_delta_tot(df_tmp, phase_to_ckpt, 'MAD_mean')
-    
-    df_metrics.loc[mask, 'delta_clr_tot'] = df_delta_clr['delta_tot'].values[0]
-    df_metrics.loc[mask, 'delta_spd_tot'] = df_delta_spd['delta_tot'].values[0]
-    df_metrics.loc[mask, 'delta_MAD_tot'] = df_delta_mad['delta_tot'].values[0]
+df_metrics = (
+    df_metrics
+    .groupby(['subject', 'scene_full_name'], group_keys=False)
+    .apply(utils.compute_deltas_for_group)
+)
 
 df_metrics['level_full_name'] = 'w' + df_metrics['scene_full_name'].str[0] + 'l' + df_metrics['scene_full_name'].str[2]
 df_metrics['scene'] = df_metrics['scene_full_name'].str[4:].astype(int)
