@@ -96,5 +96,3 @@ Primary analysis is in `notebook/select_scene.ipynb`:
 - Scene filtering ensures all 5 human subjects completed the scene
 - The `df_metrics` structure has one row per (subject, learning_phase, scene_full_name) combination
 - MAD metrics are only available for scenes with position variable data (not all scenes)
-
-test
