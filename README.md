@@ -17,7 +17,6 @@ invoke setup
 
 # (Optional) Install Jupyter kernel
 pip install ipykernel
-python -m ipykernel install --user --name .scene_selection_env --display-name "Python (scene_selection)"
 ```
 
 To see all available tasks:

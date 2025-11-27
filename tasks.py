@@ -79,25 +79,25 @@ def dashboard(c):
 @task
 def export_html(c, level=None, scene=None):
     """
-    Export scenes to standalone HTML files.
+    Export scenes to standalone HTML file.
+
+    Note: Currently exports all scenes to a single interactive HTML file.
+    The level and scene parameters are not yet implemented but reserved for future use.
 
     Args:
-        level: (Optional) Specific level to export (e.g., w1l1)
-        scene: (Optional) Specific scene number to export (requires level)
+        level: (Optional) Specific level to export (e.g., w1l1) - NOT YET IMPLEMENTED
+        scene: (Optional) Specific scene number to export (requires level) - NOT YET IMPLEMENTED
 
     Examples:
-        invoke export-html                    # Export all scenes
-        invoke export-html --level=w1l1       # Export all scenes from level w1l1
-        invoke export-html --level=w1l1 --scene=0  # Export single scene
+        invoke export-html                    # Export all scenes to single HTML
     """
-    output_dir = c.config.get("export", {}).get("output_dir", "html_export")
+    output_file = c.config.get("export", {}).get("output_file", "dashboard.html")
 
-    cmd = f"python export_dashboard.py --output-dir {output_dir}"
-    if level:
-        cmd += f" --level {level}"
-    if scene is not None:
-        cmd += f" --scene {scene}"
+    if level or scene is not None:
+        print("Warning: --level and --scene parameters are not yet implemented.")
+        print("Exporting all scenes to a single HTML file instead.")
 
+    cmd = f"python export_dashboard.py --output {output_file}"
     c.run(cmd)
 
 

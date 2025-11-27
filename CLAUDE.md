@@ -81,12 +81,12 @@ The analysis follows a multi-stage pipeline that transforms raw gameplay data in
 - Callbacks for dynamic level/scene selection
 - Better performance and UX than Jupyter widgets
 
-**`export_html.py`** - HTML export for sharing:
-- `export_single_scene()`: Export one scene to standalone HTML
-- `export_all_scenes()`: Export all scenes with index page
-- `export_scene_subset()`: Export selected scenes
-- `create_index_page()`: Generate navigation index
-- Command-line interface for flexible export options
+**`export_dashboard.py`** - HTML export for sharing:
+- `prepare_data_for_export()`: Prepares minimal data for client-side rendering
+- `image_to_base64()`: Converts images to base64 for embedding
+- `create_lightweight_html()`: Creates single HTML file with all scenes
+- Embeds data and configuration, generates figures client-side using Plotly.js
+- Command-line interface: `--data` (input parquet) and `--output` (output HTML file)
 
 ### 3. Subject Types
 
@@ -163,25 +163,25 @@ Features:
 
 ### Option 2: Export to HTML (For Sharing)
 
-**Create standalone HTML files** that anyone can open in a browser (no Python required):
+**Create a standalone HTML file** that anyone can open in a browser (no Python required):
 
 ```bash
-# Using airoh tasks (recommended)
-invoke export-html                          # Export all scenes
-invoke export-html --level=w1l1             # Export all scenes from one level
-invoke export-html --level=w1l1 --scene=0   # Export single scene
+# Using airoh task (recommended)
+invoke export-html
 
 # Or directly using Python script
-python export_dashboard.py --output-dir html_export
-python export_dashboard.py --level w1l1 --scene 0 --output-dir html_export
+python export_dashboard.py --output dashboard.html
 ```
 
 This creates:
-- Individual HTML files for each scene (5-10MB each)
-- An `index.html` with navigation to all scenes
-- Fully interactive Plotly visualizations
+- Single interactive HTML file (~50-60MB) containing all scenes
+- Fully interactive Plotly visualizations with level/scene navigation
+- Clickable thumbnails for scene selection
+- All images embedded as base64
 - No server needed - just open in browser
 - Perfect for sharing with collaborators
+
+**Note**: The `--level` and `--scene` filtering options mentioned in some documentation are not yet implemented. Currently, all scenes are exported to a single comprehensive HTML file.
 
 ### Option 3: Jupyter Widgets (Legacy)
 
