@@ -1,2 +1,7 @@
 env/
 env_select_scene/
+html_export/
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+*.html

@@ -38,7 +38,7 @@ The analysis follows a multi-stage pipeline that transforms raw gameplay data in
 - Computes delta metrics showing learning progress using `utils.compute_deltas_for_group()`
 - Outputs `sourcedata/df_metrics.parquet`
 
-**`creat_df_variables.py`** - Extracts PPO variables:
+**`create_df_variables.py`** - Extracts PPO variables:
 - Reads JSON files containing frame-by-frame player position data
 - Parses file paths to extract world, level, scene, clip codes
 - Extracts `player_x_posHi`, `player_x_posLo`, `player_y_pos` from JSONs
@@ -52,6 +52,26 @@ The analysis follows a multi-stage pipeline that transforms raw gameplay data in
 - `compute_delta_tot()`: Calculates delta between min/max checkpoints for a metric
 - `mad()`: Median Absolute Deviation calculation
 - `get_mads()`: Aggregates MAD of y-position for each x-position (trajectory variability)
+
+**`dashboard.py`** - Core visualization functions (used by both Jupyter and Dash):
+- `make_dashboard()`: Creates complete Plotly dashboard for a scene
+- `get_phase_configurations()`: Returns phase orders, colors, and mappings for all subject types
+- `load_scene_image()`, `get_traces()`, `concat_traces()`: Image loading and processing
+- `add_*_plot()`: Individual plot creation functions (MAD, clearance, speed, clip count)
+- `run_dashboard()`: Legacy Jupyter widgets interface
+
+**`dash_app.py`** - Modern web dashboard application:
+- `create_app()`: Creates Dash web application with Bootstrap styling
+- `run_server()`: Launches local web server for interactive exploration
+- Callbacks for dynamic level/scene selection
+- Better performance and UX than Jupyter widgets
+
+**`export_html.py`** - HTML export for sharing:
+- `export_single_scene()`: Export one scene to standalone HTML
+- `export_all_scenes()`: Export all scenes with index page
+- `export_scene_subset()`: Export selected scenes
+- `create_index_page()`: Generate navigation index
+- Command-line interface for flexible export options
 
 ### 3. Subject Types
 
@@ -76,6 +96,71 @@ The codebase distinguishes three subject types:
 - **`delta_spd_tot`**: Total change in average speed across learning
 - **`delta_MAD_tot`**: Total change in trajectory variability (MAD of y-position per x-position)
 
+## Running Scripts
+
+All Python scripts follow standard conventions with `if __name__ == "__main__"` blocks:
+
+```bash
+# Generate metrics from raw data
+python code/make_df_metrics.py
+
+# Extract PPO variables from JSON files
+python code/create_df_variables.py
+
+# Convert between CSV and Parquet formats
+python code/convert_csv2parquet.py
+python code/parquet_2_csv.py
+```
+
+## Interactive Dashboard
+
+The project includes a modern web-based dashboard for exploring learning metrics:
+
+### Option 1: Dash Web Application (Recommended)
+
+**Run locally** with better performance and UX:
+```bash
+# Install dependencies first
+pip install -r requirements.txt
+
+# Start the web server
+python run_dashboard.py
+
+# Open browser to http://localhost:8050
+```
+
+Features:
+- Fast, responsive interface with Bootstrap styling
+- Real-time scene/level selection
+- Better performance than Jupyter widgets
+- Professional-looking visualizations
+
+### Option 2: Export to HTML (For Sharing)
+
+**Create standalone HTML files** that anyone can open in a browser (no Python required):
+
+```bash
+# Export all scenes
+python export_dashboard.py --output-dir html_export
+
+# Export single scene
+python export_dashboard.py --level w1l1 --scene 0 --output-dir html_export
+
+# Export all scenes from one level
+python export_dashboard.py --level w1l1 --output-dir html_export
+```
+
+This creates:
+- Individual HTML files for each scene (5-10MB each)
+- An `index.html` with navigation to all scenes
+- Fully interactive Plotly visualizations
+- No server needed - just open in browser
+- Perfect for sharing with collaborators
+
+### Option 3: Jupyter Widgets (Legacy)
+
+Available in `notebook/figure_exploration.ipynb` for in-notebook exploration (slower).
+
 ## Analysis Workflow
 
 Primary analysis is in `notebook/select_scene.ipynb`:
@@ -89,6 +174,13 @@ Primary analysis is in `notebook/select_scene.ipynb`:
 
 - `convert_csv2parquet.py`: CSV → Parquet (forces string dtype to avoid type guessing issues)
 - `parquet_2_csv.py`: Parquet → CSV using pyarrow for proper type handling
+
+## Code Organization
+
+All scripts are organized into small, focused functions with clear docstrings:
+- Each script has a `main()` function that orchestrates the pipeline
+- Utility functions in `utils.py` handle metric computations
+- Functions are designed to be readable and maintainable
 
 ## Important Notes
 
