@@ -709,14 +709,14 @@ def make_dashboard(df, level, scene):
         column_widths=[0.2, 0.2, 0.2, 0.2, 0.2],
         row_heights=[0.20, 0.35, 0.225, 0.225],  # More space for traces
         horizontal_spacing=0.08,  # Increased spacing to prevent label overlap
-        vertical_spacing=0.10,
+        vertical_spacing=0.15,  # Increased vertical spacing for titles
         subplot_titles=(
             "Scene Background",
             "", "", "", "", "",  # 5 trace subplots (no individual titles)
-            "mean MADs per Learning Phase",
-            "Num. Clips per Learning Phase",
-            "Clearance Through Learning-Phases",
-            "Z Speed Through Learning-Phases"
+            "Trajectory Variability (Mean MAD of Y-position)",
+            "Number of Clips per Learning Phase",
+            "Success Rate (% Cleared) per Learning Phase",
+            "Average Horizontal Speed (pixels/sec)"
         )
     )
 
@@ -751,12 +751,27 @@ def make_dashboard(df, level, scene):
         bargap=0.3,
     )
 
-    # Adjust subplot title sizes (skip the empty trace titles)
-    title_indices = [0, 6, 7, 8, 9]  # Scene background + 4 metric plots
-    for i, ann_idx in enumerate(title_indices):
-        if ann_idx < len(fig.layout.annotations):
-            fig.layout.annotations[ann_idx].font.size = 12
-            fig.layout.annotations[ann_idx].yshift = 6
+    # Adjust subplot title sizes and position
+    # Make subplot titles visible and bold
+    for ann in fig.layout.annotations:
+        # Check if this is a main subplot title (not "Traces Overview" or subject labels)
+        if hasattr(ann, 'text') and ann.text:
+            # Subject labels (sub-01, sub-02, etc.) - keep smaller
+            if ann.text.startswith("sub-"):
+                ann.font.size = 10
+                ann.yshift = 0
+            # Traces Overview - keep as is
+            elif ann.text == "Traces Overview":
+                pass
+            # Main subplot titles - make prominent
+            else:
+                ann.font.size = 16  # Larger font
+                ann.font.color = "black"
+                ann.yshift = 25  # Move titles much higher above the plots
+                ann.yanchor = "bottom"  # Ensure proper anchoring
+                # Make titles bold
+                if not ann.text.startswith("<b>"):
+                    ann.text = f"<b>{ann.text}</b>"
 
     return fig
 

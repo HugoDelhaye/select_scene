@@ -480,7 +480,56 @@ def create_lightweight_html(df, output_path='dashboard.html'):
                 showlegend: true,
                 legend: {{orientation: "h", y: -0.15, x: 0.0}},
                 grid: {{rows: 2, columns: 2, pattern: 'independent'}},
-                annotations: []
+                annotations: [
+                    // Title for MAD plot (top-left)
+                    {{
+                        text: '<b>Trajectory Variability (Mean MAD of Y-position)</b>',
+                        xref: 'x domain',
+                        yref: 'y domain',
+                        x: 0.5,
+                        y: 1.15,
+                        xanchor: 'center',
+                        yanchor: 'bottom',
+                        showarrow: false,
+                        font: {{size: 14, color: 'black'}}
+                    }},
+                    // Title for Clip Count plot (top-right)
+                    {{
+                        text: '<b>Number of Clips per Learning Phase</b>',
+                        xref: 'x2 domain',
+                        yref: 'y2 domain',
+                        x: 0.5,
+                        y: 1.15,
+                        xanchor: 'center',
+                        yanchor: 'bottom',
+                        showarrow: false,
+                        font: {{size: 14, color: 'black'}}
+                    }},
+                    // Title for Clearance plot (bottom-left)
+                    {{
+                        text: '<b>Success Rate (% Cleared) per Learning Phase</b>',
+                        xref: 'x3 domain',
+                        yref: 'y3 domain',
+                        x: 0.5,
+                        y: 1.15,
+                        xanchor: 'center',
+                        yanchor: 'bottom',
+                        showarrow: false,
+                        font: {{size: 14, color: 'black'}}
+                    }},
+                    // Title for Speed plot (bottom-right)
+                    {{
+                        text: '<b>Average Horizontal Speed (pixels/sec)</b>',
+                        xref: 'x4 domain',
+                        yref: 'y4 domain',
+                        x: 0.5,
+                        y: 1.15,
+                        xanchor: 'center',
+                        yanchor: 'bottom',
+                        showarrow: false,
+                        font: {{size: 14, color: 'black'}}
+                    }}
+                ]
             }};
 
             return {{data: traces, layout: layout}};

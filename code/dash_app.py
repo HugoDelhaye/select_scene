@@ -312,7 +312,7 @@ def create_app(df=None, external_stylesheets=None):
                     'scale': 2
                 }
             },
-            style={'height': '1050px'}
+            style={'height': '1150px'}  # Increased height to accommodate titles
         )
 
         # Update level overview with highlighted scene
