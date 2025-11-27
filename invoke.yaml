@@ -1,0 +1,46 @@
+# Airoh configuration for scene selection pipeline
+# This file defines paths, data sources, and settings for invoke tasks
+
+# Container configuration
+container:
+  image: scene-selection
+
+# Directory structure
+directories:
+  code: code
+  notebooks: notebook
+  sourcedata: sourcedata
+  output: html_export
+
+# Data files configuration
+files:
+  # Metadata files
+  clips_metadata_im:
+    path: sourcedata/clips_metadata_from_im.parquet
+  clips_metadata_patterns:
+    path: sourcedata/clips_metadata_with_patterns.parquet
+
+  # Variable files
+  df_variables_hum:
+    path: sourcedata/df_variables_hum.parquet
+  df_variables_ppo:
+    path: sourcedata/df_variables_ppo.parquet
+
+  # Output files
+  df_metrics:
+    path: sourcedata/df_metrics.parquet
+
+# Python environment
+python:
+  requirements: requirements.txt
+  venv: .scene_selection_env
+
+# Dashboard configuration
+dashboard:
+  host: localhost
+  port: 8050
+
+# Export configuration
+export:
+  output_dir: html_export
+  index_file: index.html

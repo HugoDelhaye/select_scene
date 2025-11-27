@@ -9,3 +9,5 @@ dash
 dash-bootstrap-components
 kaleido
 tqdm
+airoh>=0.1.4
+invoke>=2.0

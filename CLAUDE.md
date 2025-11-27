@@ -8,15 +8,30 @@ This repository analyzes Super Mario Bros gameplay data from multiple sources (h
 
 ## Environment Setup
 
+This project uses [airoh](https://github.com/airoh-pipeline/airoh), a lightweight Python task library for reproducible research workflows. All tasks are managed through the `invoke` framework.
+
 ```bash
-python -m venv .scene_selection_env
-source .scene_selection_env/bin/activate
+# Install dependencies (includes airoh)
+pip install -r requirements.txt
+
+# Or use the airoh setup task
+invoke setup
+
+# (Optional) Install Jupyter kernel
 pip install ipykernel
 python -m ipykernel install --user --name .scene_selection_env --display-name "Python (scene_selection)"
-pip install -r requirements.txt
 ```
 
 The virtual environment is located in `env/` (committed to repo).
+
+### Task Automation with Airoh
+
+List all available tasks:
+```bash
+invoke --list
+```
+
+The project configuration is defined in `invoke.yaml` and tasks are defined in `tasks.py`.
 
 ## Data Pipeline Architecture
 
@@ -98,18 +113,29 @@ The codebase distinguishes three subject types:
 
 ## Running Scripts
 
-All Python scripts follow standard conventions with `if __name__ == "__main__"` blocks:
+All Python scripts follow standard conventions with `if __name__ == "__main__"` blocks. They can be run directly or via airoh tasks:
 
 ```bash
-# Generate metrics from raw data
-python code/make_df_metrics.py
+# Generate metrics from raw data (recommended: use airoh task)
+invoke process-data
+# Or directly: python code/make_df_metrics.py
 
 # Extract PPO variables from JSON files
-python code/create_df_variables.py
+invoke process-ppo-variables
+# Or directly: python code/create_df_variables.py
 
 # Convert between CSV and Parquet formats
-python code/convert_csv2parquet.py
-python code/parquet_2_csv.py
+invoke convert-csv-to-parquet
+invoke convert-parquet-to-csv
+# Or directly:
+# python code/convert_csv2parquet.py
+# python code/parquet_2_csv.py
+
+# Display dataset statistics
+invoke stats
+
+# List all available scenes
+invoke list-scenes
 ```
 
 ## Interactive Dashboard
@@ -120,13 +146,13 @@ The project includes a modern web-based dashboard for exploring learning metrics
 
 **Run locally** with better performance and UX:
 ```bash
-# Install dependencies first
-pip install -r requirements.txt
+# Using airoh task (recommended)
+invoke dashboard
 
-# Start the web server
+# Or directly
 python run_dashboard.py
 
-# Open browser to http://localhost:8050
+# Opens at http://localhost:8050
 ```
 
 Features:
@@ -140,14 +166,14 @@ Features:
 **Create standalone HTML files** that anyone can open in a browser (no Python required):
 
 ```bash
-# Export all scenes
+# Using airoh tasks (recommended)
+invoke export-html                          # Export all scenes
+invoke export-html --level=w1l1             # Export all scenes from one level
+invoke export-html --level=w1l1 --scene=0   # Export single scene
+
+# Or directly using Python script
 python export_dashboard.py --output-dir html_export
-
-# Export single scene
 python export_dashboard.py --level w1l1 --scene 0 --output-dir html_export
-
-# Export all scenes from one level
-python export_dashboard.py --level w1l1 --output-dir html_export
 ```
 
 This creates:
